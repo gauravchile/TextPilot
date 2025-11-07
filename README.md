@@ -117,7 +117,7 @@ docker compose up -d
 ### Example:
 
 ```bash
-curl -s -X POST http://localhost:8080/analyze \
+curl -s -X POST http://localhost:80/analyze \
   -H "Content-Type: application/json" \
   -d '{"text": "TextPilot is an awesome project!"}'
 ```
