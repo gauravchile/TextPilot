@@ -1,9 +1,3 @@
-# =====================================================================
-# 🧠 TextPilot – AI Text Analyzer (Stable Build + Network Optimized)
-# Maintainer: Gaurav Chile
-# Version: 2.3 — Fast, Resilient, and Pre-cached
-# =====================================================================
-
 # ---------- Base Builder Stage ----------
 FROM python:3.11-slim AS builder
 
