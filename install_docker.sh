@@ -1,8 +1,7 @@
 #!/bin/bash
 # =====================================================================
 # UNIVERSAL DOCKER INSTALLER (DEBIAN, RHEL, FEDORA, SUSE, AMAZON)
-# Author: Gaurav Chile — Modern Docker CE + Compose Plugin (2025 Edition)
-# Version: 4.2.0
+# Author: Gaurav Chile — Docker CE + Compose Plugin
 # =====================================================================
 
 set -e
