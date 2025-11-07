@@ -1,0 +1,6 @@
+Flask==3.0.3
+gunicorn==22.0.0
+transformers==4.45.2
+torch==2.4.1
+werkzeug==3.0.3
+

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TextPilot — AI Sentiment Analyzer</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --panel: #1f2833;
+      --text: #c5c6c7;
+      --teal: #45a29e;
+      --cyan: #66fcf1;
+      --red: #ff5c5c;
+      --green: #00ff88;
+      --yellow: #ffd966;
+    }
+
+    body {
+      margin: 0;
+      padding-top: 80px;
+      color: var(--text);
+      background: var(--bg);
+      font-family: "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* Background Canvas for Particles */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      background: radial-gradient(circle at center, #0b0c10 0%, #000000 100%);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--cyan);
+      font-size: 2.7em;
+      text-shadow: 0 0 12px var(--cyan);
+      animation: glowTitle 3s infinite alternate;
+    }
+
+    @keyframes glowTitle {
+      from { text-shadow: 0 0 8px var(--cyan); }
+      to { text-shadow: 0 0 20px var(--cyan); }
+    }
+
+    p {
+      text-align: center;
+      color: var(--text);
+      font-size: 1.1em;
+      opacity: 0.85;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      display: block;
+      margin: 0 auto;
+      width: 90%;
+      max-width: 600px;
+      height: 120px;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--teal);
+      background: var(--panel);
+      color: var(--text);
+      resize: none;
+      font-size: 1em;
+      outline: none;
+      box-shadow: 0 0 10px rgba(102, 252, 241, 0.2);
+      transition: 0.3s;
+    }
+
+    textarea:focus {
+      box-shadow: 0 0 15px var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    button {
+      display: block;
+      margin: 20px auto;
+      background: var(--teal);
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 1em;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 15px rgba(69, 162, 158, 0.6);
+    }
+
+    button:hover {
+      background: var(--cyan);
+      color: var(--bg);
+      box-shadow: 0 0 20px var(--cyan);
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 1.2em;
+      text-align: center;
+      min-height: 60px;
+    }
+
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .neutral  { color: var(--yellow); }
+
+    .emoji {
+      font-size: 2.2em;
+      display: block;
+      margin-top: 5px;
+      text-shadow: 0 0 15px currentColor;
+      animation: fadeIn 0.6s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: ''; }
+      40% { content: '.'; }
+      60% { content: '..'; }
+      80%, 100% { content: '...'; }
+    }
+
+    #resetBtn {
+      position: fixed;
+      bottom: 70px;
+      right: 25px;
+      background: var(--red);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 5px rgba(255, 92, 92, 0.5);
+      transition: 0.3s;
+    }
+
+    #resetBtn:hover {
+      background: #ff3b3b;
+      box-shadow: 0 0 15px var(--red);
+    }
+
+    .dashboard {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(31, 40, 51, 0.95);
+      color: var(--text);
+      text-align: center;
+      padding: 10px 0;
+      border-top: 1px solid var(--teal);
+      font-size: 1em;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    .dashboard span {
+      margin: 0 12px;
+      font-weight: bold;
+    }
+
+    .positiveStat { color: var(--green); }
+    .negativeStat { color: var(--red); }
+    .neutralStat  { color: var(--yellow); }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <h1>🚀 TextPilot</h1>
+  <p>Analyze your text sentiment instantly — AI that feels alive ✨</p>
+
+  <textarea id="inputText" placeholder="Start typing... the AI will sense your vibe 🌌"></textarea><br>
+  <button onclick="analyzeText()">Analyze</button>
+  <div class="result" id="resultBox"></div>
+
+  <button id="resetBtn" onclick="resetStats()">🔁 Reset Stats</button>
+
+  <div class="dashboard">
+    <span>😊 Positive: <span id="posCount" class="positiveStat">0</span></span>
+    <span>😐 Neutral: <span id="neuCount" class="neutralStat">0</span></span>
+    <span>😞 Negative: <span id="negCount" class="negativeStat">0</span></span>
+  </div>
+
+  <script>
+    // ✨ Floating particle background
+    const canvas = document.getElementById("bgCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5) * 0.5,
+        dy: (Math.random() - 0.5) * 0.5,
+        color: `hsl(${180 + Math.random() * 60}, 100%, 65%)`
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // 🧠 Core logic
+    if (!localStorage.getItem("textpilot_stats")) {
+      localStorage.setItem("textpilot_stats", JSON.stringify({positive: 0, neutral: 0, negative: 0}));
+    }
+
+    function updateDashboard() {
+      const stats = JSON.parse(localStorage.getItem("textpilot_stats"));
+      document.getElementById("posCount").textContent = stats.positive;
+      document.getElementById("neuCount").textContent = stats.neutral;
+      document.getElementById("negCount").textContent = stats.negative;
+    }
+
+    async function analyzeText() {
+      const text = document.getElementById('inputText').value.trim();
+      const resultBox = document.getElementById('resultBox');
+      if (!text) {
+        resultBox.innerHTML = "⚠️ Please enter some text.";
+        return;
+      }
+
+      resultBox.innerHTML = "<span class='dots'>🤖 TextPilot is thinking</span>";
+      resultBox.style.opacity = 0.8;
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await response.json();
+        if (data.label) {
+          const sentiment = data.label.toLowerCase();
+          const score = (data.score * 100).toFixed(2);
+          const emoji = sentiment === "positive" ? "😊" : sentiment === "negative" ? "😞" : "😐";
+
+          resultBox.innerHTML = `
+            🧠 Sentiment: <span class="${sentiment}">${data.label}</span><br>
+            Confidence: ${score}%<br>
+            <span class="emoji ${sentiment}">${emoji}</span>
+          `;
+          resultBox.style.opacity = 1;
+
+          const stats = JSON.parse(localStorage.getItem("textpilot_stats"));
+          if (sentiment in stats) stats[sentiment]++;
+          else stats.neutral++;
+          localStorage.setItem("textpilot_stats", JSON.stringify(stats));
+          updateDashboard();
+        } else {
+          resultBox.innerHTML = "⚠️ Unable to analyze. Try again.";
+        }
+      } catch (error) {
+        console.error(error);
+        resultBox.innerHTML = "❌ Error: API not reachable.";
+      }
+    }
+
+    function resetStats() {
+      localStorage.setItem("textpilot_stats", JSON.stringify({positive: 0, neutral: 0, negative: 0}));
+      updateDashboard();
+      document.getElementById('resultBox').innerHTML = "🧹 Stats reset successfully.";
+      setTimeout(() => { document.getElementById('resultBox').innerHTML = ""; }, 1500);
+    }
+
+    updateDashboard();
+  </script>
+</body>
+</html>
+
